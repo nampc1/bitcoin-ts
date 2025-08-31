@@ -92,20 +92,28 @@ class Utils {
 }
 
 class Point {
-  private x: bigint;
-  private y: bigint;
+  private x: bigint | null;
+  private y: bigint | null;
   private a: bigint;
   private b: bigint;
 
-  constructor(x: bigint, y: bigint, a: bigint, b: bigint) {
-    if (y ** 2n !== x ** 3n + a * x + b) {
-      throw new Error('Point is not on the curve');
-    }
+  constructor(x: bigint| null, y: bigint | null, a: bigint, b: bigint) {
+    Point.isOnCurve(x, y, a, b);
 
     this.a = a;
     this.b = b;
     this.x = x;
     this.y = y;
+  }
+
+  private static isOnCurve(x: bigint | null, y: bigint | null, a: bigint, b: bigint): void {
+    if (x === null || y === null) {
+      return;
+    }
+
+    if (y ** 2n !== x ** 3n + a * x + b) {
+      throw new Error('Point is not on the curve');
+    }
   }
 
   eq(other: Point) {
@@ -115,6 +123,18 @@ class Point {
       this.a === other.a &&
       this.b === other.b
     );
+  }
+
+  add(other: Point) {
+    Point.isOnCurve(other.x, other.y, other.a, other.b);
+
+    if (this.x !== other.x) {
+      const slope = (this.y - other.y) / (this.x - other.x);
+      const x = slope ** 2n - this.x - other.x;
+      const y = slope * (this.x - x) - this.y;
+
+      return new Point(x, y, this.a, this.b);
+    }
   }
 }
 
