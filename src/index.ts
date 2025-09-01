@@ -92,23 +92,55 @@ class Utils {
 }
 
 class Point {
-  private x: bigint | null;
-  private y: bigint | null;
-  private a: bigint;
-  private b: bigint;
+  private _x: bigint;
+  private _y: bigint;
+  private _a: bigint;
+  private _b: bigint;
+  private _isAtInfinity: boolean;
 
-  constructor(x: bigint| null, y: bigint | null, a: bigint, b: bigint) {
+
+  constructor(x: bigint, y: bigint, a: bigint, b: bigint) {
+    this._isAtInfinity = Point.isPointAtInfinity(x, y, a, b);
+
     Point.isOnCurve(x, y, a, b);
 
-    this.a = a;
-    this.b = b;
-    this.x = x;
-    this.y = y;
+    this._a = a;
+    this._b = b;
+    this._x = x;
+    this._y = y;
   }
 
-  private static isOnCurve(x: bigint | null, y: bigint | null, a: bigint, b: bigint): void {
-    if (x === null || y === null) {
-      return;
+  get isAtInfinity() {
+    return this._isAtInfinity;
+  }
+
+  get x() {
+    return this._x;
+  }
+
+  get y() {
+    return this._y;
+  }
+
+  get a() {
+    return this._a;
+  }
+
+  get b() {
+    return this._b;
+  }
+
+  public static getPointAtInfinity() {
+    return new Point(-0n, -0n, -0n, -0n); // todo: find a better way
+  }
+
+  private static isPointAtInfinity(x: bigint, y: bigint, a: bigint, b: bigint) {
+    return x === -0n && y === -0n && a === -0n && b === -0n;
+  }
+
+  private static isOnCurve(x: bigint, y: bigint, a: bigint, b: bigint): void {
+    if (Point.isPointAtInfinity(x, y, a, b)) {
+      return
     }
 
     if (y ** 2n !== x ** 3n + a * x + b) {
@@ -128,22 +160,36 @@ class Point {
   add(other: Point) {
     Point.isOnCurve(other.x, other.y, other.a, other.b);
 
-    if (this.x !== other.x) {
+    if (other.isAtInfinity || this.isAtInfinity) {
+      return this.isAtInfinity ?
+        new Point(other.x, other.y, other.a, other.b)
+        : new Point(this.x, this.y, this.a, this.b);
+    }
+
+    if (this.x !== other.x || this.y != other.y) {
       const slope = (this.y - other.y) / (this.x - other.x);
       const x = slope ** 2n - this.x - other.x;
       const y = slope * (this.x - x) - this.y;
 
       return new Point(x, y, this.a, this.b);
     }
+
+    if (this.x === other.x && this.y !== other.y) {
+
+    }
   }
 }
 
 function main() {
-  const test = new FieldElement(7n, 13n);
-  const test1 = new FieldElement(2n, 14n);
-  const result = test.pow(-3n);
-  console.log(result);
-  console.log(test.div(test1));
+  // const test = new FieldElement(7n, 13n);
+  // const test1 = new FieldElement(2n, 14n);
+  // const result = test.pow(-3n);
+  // console.log(result);
+  // console.log(test.div(test1));
+
+  const point = Point.getPointAtInfinity();
+
+  console.log(point.isAtInfinity);
 }
 
 main();
