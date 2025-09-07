@@ -1,3 +1,6 @@
+// Copyright (c) 2025 nampc1
+// SPDX-License-Identifier: MIT
+
 export class FieldElement {
   readonly num: bigint;
   readonly prime: bigint;
