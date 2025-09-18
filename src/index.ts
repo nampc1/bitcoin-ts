@@ -241,6 +241,7 @@ export class Point {
     let current: Point = this;
     let coefficient = coef;
 
+    // double-and-add algorithm (right-to-left)
     while (coefficient) {
       if (coefficient & 1n) {
         result = result.add(current);
@@ -252,4 +253,8 @@ export class Point {
 
     return result;
   }
+}
+
+export class S256Field {
+
 }
