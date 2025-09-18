@@ -234,4 +234,22 @@ export class Point {
 
     return new Point(x, y, this.a, this.b);
   }
+
+  scalarMul(coef: bigint): Point {
+    let result = Point.getPointAtInfinity(this.a, this.b);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let current: Point = this;
+    let coefficient = coef;
+
+    while (coefficient) {
+      if (coefficient & 1n) {
+        result = result.add(current);
+      }
+
+      current = current.add(current)
+      coefficient >>= 1n;
+    }
+
+    return result;
+  }
 }

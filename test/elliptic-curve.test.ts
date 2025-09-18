@@ -87,4 +87,49 @@ describe('elliptic curve', () => {
       expect(() => p1.add(p_other_curve)).toThrow('Cannot add 2 points not on the same curve');
     });
   });
+
+  describe('scalarMul', () => {
+    const p1 = Point.new(5n, 4n, a.num, b.num, prime);
+    const inf = Point.getPointAtInfinity(a, b);
+
+    test('should handle multiplication by 0, returning the point at infinity', () => {
+      const result = p1.scalarMul(0n);
+      expect(result.eq(inf)).toBe(true);
+      expect(result.isAtInfinity).toBe(true);
+    });
+
+    test('should handle multiplication by 1, returning the same point', () => {
+      const result = p1.scalarMul(1n);
+      expect(result.eq(p1)).toBe(true);
+    });
+
+    test('should calculate 2 * P correctly', () => {
+      // 2 * (5, 4) = (17, 20)
+      const expected = Point.new(17n, 20n, a.num, b.num, prime);
+      const result = p1.scalarMul(2n);
+      expect(result.eq(expected)).toBe(true);
+    });
+
+    test('should calculate 4 * P correctly', () => {
+      // 4 * (5, 4) = 2 * (17, 20) = (13, 7)
+      const expected = Point.new(13n, 7n, a.num, b.num, prime);
+      const result = p1.scalarMul(4n);
+      expect(result.eq(expected)).toBe(true);
+    });
+
+    test('should satisfy the distributive property: (n + m) * P = n*P + m*P', () => {
+      const n = 3n;
+      const m = 4n;
+      const nP = p1.scalarMul(n);
+      const mP = p1.scalarMul(m);
+      expect(p1.scalarMul(n + m).eq(nP.add(mP))).toBe(true);
+    });
+
+    test('should satisfy the associative property: n * (m * P) = (n * m) * P', () => {
+      const n = 3n;
+      const m = 4n;
+      const mP = p1.scalarMul(m);
+      expect(mP.scalarMul(n).eq(p1.scalarMul(n * m))).toBe(true);
+    });
+  });
 });
